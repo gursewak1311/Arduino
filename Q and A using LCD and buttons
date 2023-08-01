@@ -1,0 +1,79 @@
+/*Name: Gursewak Singh Gill
+  Date: 10-3-22
+  Description: writing a program that will display Questions(Q)
+             to the user through LCD and the user can answer 
+             these Q in form of yes or no. At the end LCD
+             will display the number of yes and no.*/
+
+#include <LiquidCrystal.h>
+//Initialise the Serial LCD.
+LiquidCrystal lcd( 12,11,5,4,3,2); //These pin numbers are hard coded in on the serial backpack board
+int button1 = 6;
+int button2 = 7;
+char* ques[4] = {"Like running?","Like facebook?","Like movies?","Like cooking?"};
+int ans[2] = {0,0}; //making an array that will store the number of yes or no
+int e = 0; //this variable will be used to controll the flow of program i.e. when the code is asking for the user input
+
+void setup()
+{
+lcd.begin (16,2); //Initialize the LCD.
+pinMode(button1, INPUT); //making the button an input type
+pinMode(button2, INPUT);
+}
+void loop()
+{	
+	instructions(); //calling the method that contains the instructions about how to answer the Questions
+  
+	for(int i=0; i<4 ; i++) //the for loop will run 4 times to enter the Q from array at specific index
+  	{
+   		lcd.clear(); 		//clear the screen
+		lcd.setCursor(0,0); //goto first column and first line (0,0)
+		lcd.print(ques[i]); //Print at cursor Location 
+    	while(e==0)   		//this will allow the lcd to wait for the user input
+    	{
+     		if(digitalRead(button1)==HIGH) //when button1 is pressed this loop will run
+      		{
+        		++ans[0];	//this will increment the value of 0 index that is set to caculate the number of yes
+        		e = 1;		//will change the value of 'e' so that the while loop ends and the flow of program jumps to next code lines
+        		delay(50);
+       		}
+      		if(digitalRead(button2)==HIGH)
+      		{
+       	 		++ans[1];	//this will increment the value of 0 index that is set to caculate the number of no
+        		e = 1;
+        		delay(50);
+      		}
+    	
+        }
+    e = 0; 		//again setting the value of 'e' so that the flow for the next Q goes same as the first Q.
+    delay(500); //to create a delay of 0.5 second by which it gives time to press the button once
+ 	
+    }
+  
+  	displayResult();	//this will display the number of "yes" and "no"
+    delay(5000); 		//gives 5 second time of see the result and resets the activity
+
+}
+
+void instructions()
+{
+	lcd.clear();
+	lcd.setCursor(0,0); //goto first column and first line (0,0)
+	lcd.print("button1 = yes");
+    delay(2000);		//creates a delay of 2 seconds
+  	lcd.clear();
+	lcd.setCursor(0,0); //goto first column and first line (0,0)
+	lcd.print("button2 = no");
+    delay(2000);
+}
+
+void displayResult()
+{
+  	lcd.clear();
+	lcd.setCursor(0,0); //goto first column and first line (0,0)
+	lcd.print("yes= ");
+    lcd.print(ans[0]);  //gives the number of times yes was selected
+    lcd.setCursor(0,1); //goto first column and second line (0,1)
+	lcd.print("no= ");
+    lcd.print(ans[1]);	//gives the number of times no was selected
+}
