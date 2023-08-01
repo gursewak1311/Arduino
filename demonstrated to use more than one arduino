@@ -1,0 +1,380 @@
+/*	Athuor: Gursewak Singh Gill
+	Date: 2022-04-19
+	Description: making this arduino the master arduino 
+    			 which will send information captured from the 
+                 IR sensor to the other arduino.
+				 The LCD which display the song name which is 
+                 being played.
+*/
+
+//Initialise the Serial LCD.
+#include <LiquidCrystal.h>		
+
+LiquidCrystal lcd( 12,11,5,4,3,2); //These pin numbers are hard coded in on the serial backpack board
+
+#include <Wire.h>	
+#include <IRremote.h>
+
+int RECV_PIN = 10; // the pin where you connect the output pin of IR sensor
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+int value = 0;	//this variable will store the value received from the IR sensor 
+int a=1;		//this variable will store the value of which song number is to be played and pass it to the slave arduino  
+int b=0;	
+
+void setup()
+{
+	lcd.begin (16,2); 	//Initialize the LCD.
+	Wire.begin();		//indicates that this is the master arduino
+	Serial.begin(9600);	//using serial begin for debugging 
+  	irrecv.enableIRIn();//enabling the IR system 
+}
+
+void loop()				//this method runs forever 
+{    
+  if (irrecv.decode(&results))//this if block will run when the IR receives value
+	{
+		value = results.value;	//storing the value received from IR sensor
+  		delay(300);
+		Serial.println(" ");
+		Serial.print("Code: ");
+		Serial.println(value); //prints the value of the button pressed
+		Serial.println(" ");
+		irrecv.resume(); // Receive the next value
+		Serial.println("*****************");
+    	if(value == 255)
+    	{ 
+      		++b;	//incrementing the value of b which was initially 0
+      		if(b>1)	//if the value of b becomes 2 then it will again be changed to 0
+        		b=0; 
+      		if(b==1)
+            {
+  				lcd.clear(); 	//clear the lcd screen
+				lcd.setCursor(0,0); 	//goto first column, then second column till 13th column and first line 
+				lcd.print("Mp3 ON");  	//Print at cursor Location
+        		delay(3000);	//will make the screen stay for 3 seconds	
+      		}
+      		if(b==0)
+            {
+  				lcd.clear(); 	//clear the lcd screen
+                lcd.setCursor(0,0); 	//goto first column, then second column till 13th column and first line 
+                lcd.print("");  		//Print at cursor Location
+                delay(3000);
+      		}
+    	}
+    
+  		if(value == -24481)
+    	{   	
+            Wire.beginTransmission(3); // transmit to device #3
+            Wire.write(1);    
+            Wire.endTransmission();    // stop transmitting
+            lcd.clear(); //clear the lcd screen
+            lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+            lcd.print("Dosanjh");  //Print at cursor Location
+            delay(3000);
+    	}
+  		if(value == 24735)
+    	{
+            ++a;	//incrementing the value of 'a' by 1
+            if(a>4)
+            	a=1;
+            Wire.beginTransmission(3); // transmit to device #3
+            Wire.write(a);    		//sending the value stored in 'a' variable to the slave arduino.
+            Wire.endTransmission();    // stop transmitting
+            if(a==1)	//this is to determine which song name is to displayed
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("Dosanjh");  //Print at cursor Location
+                delay(3000);
+            }
+            if(a==2)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("Prem");  //Print at cursor Location
+                delay(3000);
+            }
+            if(a==3)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("Sidhu");  //Print at cursor Location
+                delay(3000);
+            }
+            if(a==4)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("aujla");  //Print at cursor Location
+                delay(3000);
+            }
+    	}
+  		if(value == 8415)
+    	{
+            --a;	//decrementing the value of a
+            if(a<=0)
+            	a=4;
+            Wire.beginTransmission(3); // transmit to device #3
+            Wire.write(a);    //sending the value of 'a' to the slave arduino
+            Wire.endTransmission();    // stop transmitting
+            if(a==1)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("Dosanjh");  //Print at cursor Location
+                delay(3000);
+            }
+            if(a==2)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("Prem");  //Print at cursor Location
+                delay(3000);
+            }
+            if(a==3)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("Sidhu");  //Print at cursor Location
+                delay(3000);
+            }
+            if(a==4)
+            {
+                lcd.clear(); //clear the lcd screen
+                lcd.setCursor(0,0); //goto first column, then second column till 13th column and first line 
+                lcd.print("aujla");  //Print at cursor Location
+                delay(3000);
+            }
+    	}
+    }
+  }
+
+/*	Athuor: Gursewak Singh Gill
+	Date: 2022-04-19
+	Description: making this arduino the slave arduino 
+    			 which will receive information from the
+                 master arduino. The buzzer will play the song
+                 and the LED number indicates the song number.
+                 Ultimately Leds indicate the user at which 
+                 position is the song played, is he/she moving
+                 forward or backward while pressing the buttons.
+                 There are 4 LEDs, therefore 4 songs.
+				 
+*/
+
+#define NOTE_B0 31
+#define NOTE_C1 33
+#define NOTE_CS1 35
+#define NOTE_D1 37
+#define NOTE_DS1 39
+#define NOTE_E1 41
+#define NOTE_F1 44
+#define NOTE_FS1 46
+#define NOTE_G1 49
+#define NOTE_GS1 52
+#define NOTE_A1 55
+#define NOTE_AS1 58
+#define NOTE_B1 62
+#define NOTE_C2 65
+#define NOTE_CS2 69
+#define NOTE_D2 73
+#define NOTE_DS2 78
+#define NOTE_E2 82
+#define NOTE_F2 87
+#define NOTE_FS2 93
+#define NOTE_G2 98
+#define NOTE_GS2 104
+#define NOTE_A2 110
+#define NOTE_AS2 117
+#define NOTE_B2 123
+#define NOTE_C3 131
+#define NOTE_CS3 139
+#define NOTE_D3 147
+#define NOTE_DS3 156
+#define NOTE_E3 165
+#define NOTE_F3 175
+#define NOTE_FS3 185
+#define NOTE_G3 196
+#define NOTE_GS3 208
+#define NOTE_A3 220
+#define NOTE_AS3 233
+#define NOTE_B3 247
+#define NOTE_C4 262
+#define NOTE_CS4 277
+#define NOTE_D4 294
+#define NOTE_DS4 311
+#define NOTE_E4 330
+#define NOTE_F4 349
+#define NOTE_FS4 370
+#define NOTE_G4 392
+#define NOTE_GS4 415
+#define NOTE_A4 440
+#define NOTE_AS4 466
+#define NOTE_B4 494
+#define NOTE_C5 523
+#define NOTE_CS5 554
+#define NOTE_D5 587
+#define NOTE_DS5 622
+#define NOTE_E5 659
+#define NOTE_F5 698
+#define NOTE_FS5 740
+#define NOTE_G5 784
+#define NOTE_GS5 831
+#define NOTE_A5 880
+#define NOTE_AS5 932
+#define NOTE_B5 988
+#define NOTE_C6 1047
+#define NOTE_CS6 1109
+#define NOTE_D6 1175
+#define NOTE_DS6 1245
+#define NOTE_E6 1319
+#define NOTE_F6 1397
+#define NOTE_FS6 1480
+#define NOTE_G6 1568
+#define NOTE_GS6 1661
+#define NOTE_A6 1760
+#define NOTE_AS6 1865
+#define NOTE_B6 1976
+#define NOTE_C7 2093
+#define NOTE_CS7 2217
+#define NOTE_D7 2349
+#define NOTE_DS7 2489
+#define NOTE_E7 2637
+#define NOTE_F7 2794
+#define NOTE_FS7 2960
+#define NOTE_G7 3136
+#define NOTE_GS7 3322
+#define NOTE_A7 3520
+#define NOTE_AS7 3729
+#define NOTE_B7 3951
+#define NOTE_C8 4186
+#define NOTE_CS8 4435
+#define NOTE_D8 4699
+#define NOTE_DS8 4978
+
+
+#include <Wire.h>
+
+//declaring the LED names and the pins to which they are attached in the arduino
+int red0 = 13;
+int red1 = 12;
+int red2 = 8;
+int red3 = 7;
+
+
+int a=0;		//this variable will store the value recieved by wire transmission
+int buzzerPin = 5 ; //The buzzerPin is connected to pin 5 of the Arduino.
+int runsong1=1;
+int runsong2=1;
+int runsong3=1;
+int runsong4=1;
+
+void setup() { //The Setup function runs once.
+pinMode(buzzerPin, OUTPUT); //Setup buzzer pin as an output pin.
+pinMode(red0, OUTPUT);		//Setup red LED pin as an output pin.
+pinMode(red1, OUTPUT);
+pinMode(red2, OUTPUT);
+pinMode(red3, OUTPUT);
+Wire.begin(3);	//this indicates that the value sent from master arduino to device "3" will come to this arduino
+Serial.begin(9600);
+Wire.onReceive(receiveEvent); // register event
+}
+void loop() { //The loop function runs forever.
+  if (runsong1==0) 			
+  { 
+    song1();		//call the method song1
+  }
+    if (runsong2==0) 			
+  { 
+    song2();
+  }
+    if (runsong3==0) 			
+  { 
+    song3();
+  }
+    if (runsong4==0) 			
+  { 
+    song4();
+  }
+}
+
+void receiveEvent(int howMany)
+{ 
+    a = Wire.read();    // receive byte as an integer
+    Serial.println(a);
+  	if(a==1){
+      runsong1=0;	//if the condition in the if block satisfy, then the value of runsong1 will be changed
+	}
+  if(a==2){
+      runsong2=0;
+	}
+  if(a==3){
+      runsong3=0;
+	}
+  if(a==4){
+      runsong4=0;
+	}
+}
+
+void song1()
+{
+  //storing the notes in an array
+  int song[] = {NOTE_C4,NOTE_A4,NOTE_C4,NOTE_A4,NOTE_B4,NOTE_B4,NOTE_A3,NOTE_D3,NOTE_A3,NOTE_D5,NOTE_C4,NOTE_C3};
+  int duration[] = {408,408,408,408,408,408,408,408,408,408,408,408};
+  //using the for loop to run through each note
+  for(int i = 0; i < (sizeof(song)/sizeof(song[0])); i++)
+  { 												//this will get the size of array and run the for loop
+    tone(buzzerPin, song[i],duration[i]);  	//play the note on the buzzer
+    digitalWrite(red0,HIGH);	//turning ON the LED
+    delay(duration[i] + 20); //making a delay
+    digitalWrite(red0,LOW);	//turing OFF the LED
+   
+  }
+  runsong1=1;	//again changing the value of runsong1 to zero in order to stop the song begin played over and over
+}
+void song2()
+{
+  int song[] = {NOTE_F2,NOTE_B4,NOTE_F4,NOTE_B3,NOTE_F2,NOTE_B4,NOTE_F4,NOTE_B3,NOTE_F2,NOTE_B4,NOTE_F3,NOTE_B3};
+  int duration[] = {408,408,408,408,408,408,408,408,408,408,408,408};
+ 
+  for(int i = 0; i < (sizeof(song)/sizeof(song[0])); i++)
+  { 												//this will get the size of array and run the for loop
+    tone(buzzerPin, song[i],duration[i]);  	//play the note on the buzzer
+    digitalWrite(red1,HIGH);
+    delay(duration[i] + 20); 
+    digitalWrite(red1,LOW);
+  }
+  runsong2=1;
+}
+void song3()
+{
+  int song[] = {NOTE_D4,NOTE_C4,NOTE_E3,NOTE_G5,NOTE_D4,NOTE_C4,NOTE_E3,NOTE_G5,NOTE_D4,NOTE_C4,NOTE_E3,NOTE_G5};
+  int duration[] = {408,408,408,408,408,408,408,408,408,408,408,408};
+ 
+  for(int i = 0; i < (sizeof(song)/sizeof(song[0])); i++)
+  { 												//this will get the size of array and run the for loop
+    tone(buzzerPin, song[i],duration[i]);  	//play the note on the buzzer
+   digitalWrite(red2,HIGH);
+    delay(duration[i] + 20); 
+    digitalWrite(red2,LOW);
+  }
+  runsong3=1;
+}
+void song4()
+{
+  int song[] = {NOTE_G4,NOTE_C4,NOTE_D4,NOTE_E4,NOTE_G4,NOTE_C4,NOTE_D4,NOTE_E4,NOTE_G4,NOTE_C4,NOTE_D4,NOTE_E4};
+  int duration[] = {408,408,408,408,408,408,408,408,408,408,408,408};
+ 
+  for(int i = 0; i < (sizeof(song)/sizeof(song[0])); i++)
+  { 												//this will get the size of array and run the for loop
+    tone(buzzerPin, song[i],duration[i]);  	//play the note on the buzzer
+    //THE POSITION OF THE LED WILL DESCRIBE IS THE USER MOVING FORWARD OR BACKWARD IN THE PLAYLIST
+    digitalWrite(red3,HIGH);
+    delay(duration[i] + 20); 
+    digitalWrite(red3,LOW);
+  }
+  runsong4=1;
+}
+
+
