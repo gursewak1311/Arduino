@@ -1,0 +1,146 @@
+/*Name: Gursewak Singh Gill
+  Date: 30-3-22
+  Description:  taking two buttons that move the servo motor
+  				by 25%. one button moves it forward but when 
+                the motor hits 100% again pressing button one
+                will make the motor rotate back to 0%. Same will
+                happen with second button but the motor will move 
+                backwards and will move to 100% when button is 
+                hit at 0%.
+                As the motor rotates the RGB will also show
+                different colors*/
+
+#include <Servo.h>
+Servo myservo;
+int button1 = 2;	//connecting the button 1 to port 2
+int button2 = 3;
+int a =0;			//using the variable to store the value change when buttons are pressed
+int red = 11;		//connecting the red pin of rgb led to port 11
+int green = 6;		//connecting the green pin of rgb led to port 6
+int blue = 10;		//connecting the blue pin of rgb led to port 10
+
+void setup()
+{
+myservo.attach(4);
+Serial.begin(9600);
+pinMode(button1, INPUT); //making the button an input type
+pinMode(button2, INPUT);
+pinMode(red, OUTPUT); 	//making the rgb red pin as an output type
+pinMode(green, OUTPUT);
+pinMode(blue, OUTPUT);
+  if(a==0){				//using this code so that the motor starts at the initial position of 0%
+  myservo.write(0);
+  analogWrite(red,0);
+  analogWrite(green,0);
+  analogWrite(blue,255);
+  delay(300);}
+}
+void loop()			//this method will run forever
+{
+  if(digitalRead(button1)==HIGH){ //this loop will run when button1 is pressed
+  delay(50);
+    ++a;	//will increse the value of a by one
+    if(a>4)  
+     turnBack();	//calling the method that contains the code to rotate the motor back to 0%
+    positions();	//calling the method which describe the position of the motor according to value 'a'
+  }
+  if(digitalRead(button2)==HIGH)
+  {
+    delay(50);
+    --a;	//decrease the value of 'a' by one
+    if(a<0)
+      turnForward();
+    positions();
+}
+}
+void positions()
+{
+  if(a==0){			//this block of code will when the value of 'a' is 0
+myservo.write(0);		//will move the motor to 0%
+    //produces a blue color from rgb
+  analogWrite(red,0);
+  analogWrite(green,0);
+  analogWrite(blue,255); 
+      delay(300);}
+  if(a==1){
+myservo.write(45);	//will move the motor to 25%
+    //shows a green color on rgb
+  analogWrite(red,0);
+  analogWrite(green,255);
+  analogWrite(blue,0);
+      delay(300);}
+    if(a==2){
+myservo.write(90); 	//will move the motor to 50%
+      //shows a red color on rgb
+  analogWrite(red,255);
+  analogWrite(green,0);
+  analogWrite(blue,0);
+      delay(300);}
+    if(a==3){
+myservo.write(135);	//will move the motor to 75%
+      //shows lavendar color
+  analogWrite(red,155);
+  analogWrite(green,50);
+  analogWrite(blue,255);
+      delay(300);}
+    if(a==4){
+myservo.write(180);	//will move the motor to 100%
+      //shows light orange color
+  analogWrite(red,255);
+  analogWrite(green,155);
+  analogWrite(blue,0);
+      delay(300);}
+}
+void turnBack()
+{
+  a=0;
+ myservo.write(135);
+  analogWrite(red,155);
+  analogWrite(green,50);
+  analogWrite(blue,255);
+  delay(300);
+  myservo.write(90);
+  analogWrite(red,255);
+  analogWrite(green,0);
+  analogWrite(blue,0);
+  delay(300);
+  myservo.write(45);
+  analogWrite(red,0);
+  analogWrite(green,255);
+  analogWrite(blue,0);
+  delay(300);
+  myservo.write(0);
+  analogWrite(red,0);
+  analogWrite(green,0);
+  analogWrite(blue,255);
+  delay(300);
+}
+  
+void turnForward()
+{  
+  a=4;
+myservo.write(45);
+  analogWrite(red,0);
+  analogWrite(green,255);
+  analogWrite(blue,0);
+      delay(300);
+    
+myservo.write(90);
+  analogWrite(red,255);
+  analogWrite(green,0);
+  analogWrite(blue,0);
+      delay(300);
+    
+myservo.write(135);
+  analogWrite(red,155);
+  analogWrite(green,50);
+  analogWrite(blue,255);
+      delay(300);
+    
+myservo.write(180);
+  analogWrite(red,255);
+  analogWrite(green,155);
+  analogWrite(blue,0);
+      delay(300);
+  }
+  
