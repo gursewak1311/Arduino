@@ -1,0 +1,73 @@
+//Name : Gursewak Singh Gill
+//Date :2 March,2022
+//Description : Creating a program that will change the brightness of red, green, blue light in RGBLed when the value of the potentiometer is changed and the color to change is decided by the user
+
+int RGBRedPin = 9; //The red RGB LED is connected pin 9 of the Arduino.
+int RGBGreenPin = 10; //The green RGB LED is connected pin 10 of the Arduino.
+int RGBBluePin = 11; //The blue RGB LED is connected pin 11 of the Arduino.
+int rotationPin = A0; //The rotation sensor is plugged into pin A0 of the Arduino.
+int data=0; //Used to store data from sensor.
+int button = 2;
+char color ; //used to store the color character input by the user
+
+void setup() { //The Setup function runs once.
+Serial.begin(9600); //This will enable the Arduino to send data to the Serial monitor.
+pinMode(rotationPin,INPUT);
+pinMode(button, INPUT);
+pinMode(RGBRedPin, OUTPUT); //Setup red RGB LED pin as an output pin.
+pinMode(RGBGreenPin, OUTPUT); //Setup green RGB LED pin as an output pin.
+pinMode(RGBBluePin, OUTPUT); //Setup blue RGB LED pin as an output pin.
+Serial.println("Enter the first letter Of the Color which you want to change ");
+//this code will allow the user to select the color to adjust without pressing the button first
+while(Serial.available() == 0) {
+  
+}
+if(Serial.available() > 0){
+    // read the incoming byte:
+    color = Serial.read();
+
+    // say what you got:
+    Serial.print(" The color to change is: ");
+    Serial.println(color);
+    delay(100);
+}
+}
+
+void loop() { //The loop function runs forever.
+data = analogRead(rotationPin); //Read the value from the light sensor and store it in the lightData variable.
+data = map(data,0,1023,0,255); //mapping the data
+  
+  
+if(digitalRead(button)==HIGH){
+  Serial.println("enter the next letter");
+  // will wait untill the user enters something
+  while(Serial.available() == 0) {
+  
+  }
+  // send data only when you receive data:
+  if(Serial.available() > 0){
+    // read the incoming byte:
+    color = Serial.read();
+
+    // say what you got:
+    Serial.print(" The color to change is: ");
+    Serial.println(color);
+    delay(100);
+  }
+ }
+ //will adjust the brightness of the color chosen by the user unless the button is pressed
+ if(digitalRead(button)==LOW){
+   if(color=='R'){
+    analogWrite(RGBRedPin,data); //setting the brightness of green light with the rotation pin
+    delay(30);
+   }
+   if(color=='G'){
+    analogWrite(RGBGreenPin,data); //setting the brightness of green light with the rotation pin
+    delay(30);
+   }
+   if(color=='B'){
+    analogWrite(RGBBluePin,data); //setting the brightness of green light with the rotation pin
+    delay(30);
+   }
+  } 
+}
